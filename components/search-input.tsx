@@ -31,7 +31,7 @@ export function SearchInput() {
             <Input
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Search by topic, keyword, or category..."
+                placeholder="Search by topic or keyword..."
                 className="h-14 pl-12 rounded-2xl border-slate-200 bg-white shadow-xl shadow-slate-200/50 focus-visible:ring-indigo-600 text-base"
             />
         </div>

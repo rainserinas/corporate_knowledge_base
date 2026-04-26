@@ -7,61 +7,84 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/logout-button";
 import { SearchInput } from "@/components/search-input";
+import { cn } from "@/lib/utils";
+import { ArticleCard } from "@/components/article-card";
 
-async function getDashboardData(searchQuery?: string) {
+async function getDashboardData(searchQuery?: string, categorySlug?: string) {
 	const cookieStore = await cookies();
 	const token = cookieStore.get("directus_token")?.value;
-
+	console.log(token);
 	// If no session, go to login
 	if (!token) redirect("/login");
 
 	const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL;
-	const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
-	console.log(searchParam);
+
+	const params = new URLSearchParams({
+		fields: "id,title,slug,date_created,category.name,category.slug",
+		"filter[status][_eq]": "Published",
+		sort: "-date_created"
+	});
+
+	if (searchQuery) {
+		params.append("search", searchQuery);
+	}
+
+	if (categorySlug) {
+		params.append("filter[category][slug][_eq]", categorySlug);
+	}
+
 	try {
-		const [categoriesRes, articlesRes] = await Promise.all([
+
+		const [userRes, categoriesRes, articlesRes,] = await Promise.all([
+			fetch(`${baseUrl}/users/me?fields=first_name,last_name,avatar,description,title`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+					"Accept": "application/json"
+				},
+				cache: "no-store"
+			}),
 			fetch(`${baseUrl}/items/categories?fields=id,name,slug`, {
 				headers: { Authorization: `Bearer ${token}` },
-				next: { revalidate: 30 }, // Cache for 30 seconds
+				next: { revalidate: 30 },
 			}),
 			fetch(
-				`${baseUrl}/items/articles?fields=id,title,slug,date_created,category.name&filter[status][_eq]=Published&sort=-date_created${searchParam}`,
+				`${baseUrl}/items/articles?${params.toString()}`,
 				{
 					headers: { Authorization: `Bearer ${token}` },
-					next: { revalidate: 30 },
+					cache: "no-store"
 				}
-			),
-
-			// fetch(`${baseUrl}/items/articles?fields=id,title,slug,date_created,category.name&filter[status][_eq]=Published&sort=-date_created${searchParam}`, {
-			// 	headers: { Authorization: `Bearer ${token}` },
-			// 	cache: "no-store" // Ensure fresh results during search
-			// })
+			)
 		]);
 
-		if (categoriesRes.status === 401) redirect("/login");
+		// if (categoriesRes.status === 401) redirect("/login");
 
 		const categories = await categoriesRes.json();
 		const articles = await articlesRes.json();
+		const user = await userRes.json();
 
 		console.log(articles);
-
 		return {
 			categories: categories.data || [],
 			articles: articles.data || [],
+			user: user.data || null
 		};
 	} catch (error) {
 		console.error("Dashboard Fetch Error:", error);
-		return { categories: [], articles: [] };
+		return { categories: [], articles: [], user: null };
 	}
 }
 
 export default async function HomePage({
 	searchParams,
 }: {
-	searchParams: Promise<{ q?: string }>;
+	searchParams: Promise<{ q?: string; category?: string; }>;
 }) {
 	const query = (await searchParams).q;
-	const { categories, articles } = await getDashboardData(query);
+	const activeCategory = (await searchParams).category;
+
+	const { categories, articles, user } = await getDashboardData(query, activeCategory);
+	const displayName = user?.first_name ? `${user.first_name} ${user.last_name || ""}` : "Team Member";
 
 	return (
 		<div className="min-h-screen bg-[#F8FAFC]">
@@ -84,19 +107,36 @@ export default async function HomePage({
 
 			<main className="container mx-auto max-w-6xl px-6 py-12">
 				{/* Search Hero */}
-				<section className="mb-16 space-y-6 text-center sm:text-left">
-					<div className="space-y-2">
-						<h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
-							Knowledge Base
-						</h1>
-						<p className="text-lg text-slate-500 max-w-2xl">
-							Access documentation, technical specifications, and company protocols.
-						</p>
+				<section className="mb-16 space-y-8">
+					<div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+						<div className="space-y-4">
+							<div className="space-y-1">
+								<h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl">
+									Hi, <span className="text-indigo-600">{user?.first_name || "there"}!</span>
+								</h1>
+								<p className="text-lg text-slate-500 max-w-2xl">
+									Welcome back to the <span className="font-semibold text-slate-700">Corporate Knowledge Base</span>.
+									Everything is synced and up to date.
+								</p>
+							</div>
+						</div>
+
+						{/* Visual User ID Card (The "Better UI" suggestion) */}
+						<div className="hidden lg:flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+							<div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-indigo-600 font-bold border border-slate-200">
+								{user?.first_name?.[0] || "U"}
+							</div>
+							<div className="flex flex-col">
+								<span className="text-sm font-bold text-slate-900">{displayName}</span>
+								<span className="text-[10px] font-medium uppercase text-slate-400 tracking-tight">
+									{user?.title || "Senior Staff"}
+								</span>
+							</div>
+						</div>
 					</div>
+
 					<div className="relative max-w-2xl group">
-						<section className="mb-16">
-							<SearchInput />
-						</section>
+						<SearchInput />
 					</div>
 				</section>
 
@@ -108,16 +148,38 @@ export default async function HomePage({
 								Categories
 							</h3>
 							<div className="flex flex-col gap-1">
-								{categories.map((cat: any) => (
-									<Link
-										key={cat.id}
-										href={`/category/${cat.slug}`}
-										className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 transition-all hover:bg-white hover:text-indigo-600 hover:shadow-sm active:scale-[0.98]"
-									>
-										{cat.name}
-										<ChevronRight className="h-4 w-4 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
-									</Link>
-								))}
+								{/* "All" button to clear filters */}
+								<Link
+									href="/"
+									className={cn(
+										"flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all hover:bg-white active:scale-[0.98]",
+										!activeCategory ? "bg-white text-indigo-600 shadow-sm" : "text-slate-600"
+									)}
+								>
+									All Articles
+								</Link>
+
+								{categories.map((cat: any) => {
+									const isActive = activeCategory === cat.slug;
+									return (
+										<Link
+											key={cat.id}
+											href={`/?category=${cat.slug}${query ? `&q=${query}` : ""}`} // Preserve search if active
+											className={cn(
+												"group flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all hover:bg-white active:scale-[0.98]",
+												isActive
+													? "bg-white text-indigo-600 shadow-sm"
+													: "text-slate-600 hover:text-indigo-600"
+											)}
+										>
+											{cat.name}
+											<ChevronRight className={cn(
+												"h-4 w-4 transition-all",
+												isActive ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
+											)} />
+										</Link>
+									);
+								})}
 							</div>
 						</div>
 					</aside>
@@ -134,43 +196,24 @@ export default async function HomePage({
 						</div>
 
 						<div className="grid gap-6">
-							{articles.map((article: any) => (
-								<Link
-									key={article.id}
-									href={`/articles/${article.slug}`}
-									className="group relative flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-indigo-200 hover:shadow-2xl hover:shadow-indigo-100"
-								>
-									<div className="flex items-start justify-between">
-										<div className="space-y-3">
-											<Badge className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-none px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-												{article.category?.name}
-											</Badge>
-											<h2 className="text-2xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-												{article.title}
-											</h2>
-											<div className="flex items-center gap-4 text-[12px] text-slate-400 font-medium">
-												<span className="flex items-center gap-1.5 font-mono">
-													<FileText className="h-3.5 w-3.5" />
-													ID: {article.slug.substring(0, 6)}
-												</span>
-												<span>•</span>
-												<span>
-													{new Date(
-														article.date_created
-													).toLocaleDateString("en-US", {
-														month: "long",
-														day: "numeric",
-														year: "numeric",
-													})}
-												</span>
-											</div>
-										</div>
-										<div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-300 transition-all group-hover:bg-indigo-600 group-hover:text-white">
-											<ArrowRight className="h-5 w-5" />
-										</div>
+							{articles.length === 0 ? (
+								<div className="flex flex-col items-center justify-center py-20 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+									<div className="p-4 bg-white rounded-full shadow-sm mb-4">
+										<Search className="h-8 w-8 text-slate-300" />
 									</div>
-								</Link>
-							))}
+									<h3 className="text-lg font-bold text-slate-900">No results found</h3>
+									<p className="text-slate-500 mb-6">Try adjusting your filters or search terms.</p>
+									<Link href="/" className="text-sm font-bold text-indigo-600 hover:underline">
+										Clear all filters
+									</Link>
+								</div>
+							) : (
+								<div className="grid gap-6">
+									{articles.map((article: any) => (
+										<ArticleCard key={article.id} article={article} />
+									))}
+								</div>
+							)}
 						</div>
 					</section>
 				</div>

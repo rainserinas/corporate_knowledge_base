@@ -23,7 +23,7 @@ export async function loginAction({ email, password }: LoginCredentials) {
         });
 
         const result = await response.json();
-        console.log(result);
+
         if (!response.ok) {
             return {
                 success: false,
