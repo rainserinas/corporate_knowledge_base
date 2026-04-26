@@ -4,17 +4,15 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useDebounce } from "use-debounce"; // npm install use-debounce
+import { useDebounce } from "use-debounce";
 
 export function SearchInput() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    // Get the initial search term from the URL (if it exists)
     const initialQuery = searchParams.get("q") || "";
     const [text, setText] = useState(initialQuery);
 
-    // Wait 300ms after the user stops typing before searching
     const [query] = useDebounce(text, 300);
 
     useEffect(() => {

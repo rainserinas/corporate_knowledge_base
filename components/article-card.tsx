@@ -37,7 +37,6 @@ export function ArticleCard({ article }: { article: Article }) {
                     <div className="flex items-center gap-4 text-sm text-slate-500">
                         <div className="flex items-center gap-1.5">
                             <Calendar className="h-4 w-4" />
-                            {/* Format: April 26, 2026 */}
                             <span>{format(new Date(article.date_created), "MMMM dd, yyyy")}</span>
                         </div>
                     </div>

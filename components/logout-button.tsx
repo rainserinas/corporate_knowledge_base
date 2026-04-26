@@ -15,8 +15,6 @@ export function LogoutButton() {
                 await logoutAction();
                 toast.success("Logged out successfully");
             } catch (error) {
-                // Redirects in server actions technically throw errors, 
-                // but Next.js handles them. If it's a real error, catch it here.
                 console.error(error);
             }
         });

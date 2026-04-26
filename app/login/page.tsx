@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, Loader2, ShieldCheck, Library } from "lucide-react";
+import { Lock, Mail, Loader2, ShieldCheck, Library, Eye, EyeOff, } from "lucide-react";
 import { loginAction } from "./actions";
 
 export default function LoginPage() {
@@ -14,6 +14,7 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const router = useRouter();
 
@@ -21,7 +22,6 @@ export default function LoginPage() {
         e.preventDefault();
 
         startTransition(async () => {
-            // We pass the state variables directly here
             const result = await loginAction({ email, password });
 
             if (result.success) {
@@ -104,23 +104,38 @@ export default function LoginPage() {
                                         Password
                                     </Label>
                                 </div>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
+                                <div className="relative group">
+                                    <Lock className="absolute left-3 top-3.5 h-4 w-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+
                                     <Input
                                         id="password"
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         placeholder="••••••••"
-                                        className="pl-10 h-12 border-slate-200 focus-visible:ring-indigo-600 rounded-lg"
+                                        className="pl-10 pr-10 h-12 border-slate-200 focus-visible:ring-indigo-600 rounded-lg"
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         disabled={isLoading}
                                     />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        disabled={isLoading}
+                                        className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="h-4 w-4" />
+                                        ) : (
+                                            <Eye className="h-4 w-4" />
+                                        )}
+                                    </button>
                                 </div>
                             </div>
 
                             <Button
-                                className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-lg shadow-indigo-500/20 transition-all active:scale-[0.98]"
+                                className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-lg shadow-indigo-500/20 transition-all active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
                                 type="submit"
                                 disabled={isLoading}
                             >
@@ -130,7 +145,7 @@ export default function LoginPage() {
                                         Authenticating...
                                     </>
                                 ) : (
-                                    "Access Knowledge Base"
+                                    "Enter Workspace"
                                 )}
                             </Button>
                         </form>

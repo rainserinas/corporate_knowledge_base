@@ -1,21 +1,15 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Library, Search, Clock, Layers, ChevronRight, FileText, ArrowRight } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Library, Search, ChevronRight } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
 import { SearchInput } from "@/components/search-input";
 import { cn } from "@/lib/utils";
 import { ArticleCard } from "@/components/article-card";
+import { getValidToken } from "./lib/auth-refresh";
 
 async function getDashboardData(searchQuery?: string, categorySlug?: string) {
-	const cookieStore = await cookies();
-	const token = cookieStore.get("directus_token")?.value;
-	console.log(token);
-	// If no session, go to login
-	if (!token) redirect("/login");
+	const token = await getValidToken();
 
 	const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL;
 
@@ -57,13 +51,16 @@ async function getDashboardData(searchQuery?: string, categorySlug?: string) {
 			)
 		]);
 
-		// if (categoriesRes.status === 401) redirect("/login");
-
 		const categories = await categoriesRes.json();
 		const articles = await articlesRes.json();
 		const user = await userRes.json();
 
-		console.log(articles);
+		if (articles?.errors) {
+			if (articles?.errors[0].message == "Token expired.") {
+				console.log("Token is expired");
+			}
+		}
+
 		return {
 			categories: categories.data || [],
 			articles: articles.data || [],
@@ -148,7 +145,6 @@ export default async function HomePage({
 								Categories
 							</h3>
 							<div className="flex flex-col gap-1">
-								{/* "All" button to clear filters */}
 								<Link
 									href="/"
 									className={cn(

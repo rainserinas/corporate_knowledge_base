@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-sans", // This defines the CSS variable name
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
