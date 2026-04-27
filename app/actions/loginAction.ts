@@ -57,19 +57,35 @@ export async function loginAction({ email, password }: LoginCredentials) {
 
         const cookieStore = await cookies();
 
-        const TWENTY_FOUR_HOURS = 24 * 60 * 60; // in seconds
+        const SEVEN_DAYS = 7 * 24 * 60 * 60;
 
-        const cookieOptions = {
+        cookieStore.set("directus_token", token, {
             path: "/",
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            maxAge: TWENTY_FOUR_HOURS,
             sameSite: "lax" as const,
-        };
+            // Directus returns 'expires' in milliseconds (usually 900,000)
+            // maxAge expects seconds
+            maxAge: 15 * 60, // 15 minutes
+        });
 
-        cookieStore.set("directus_token", token, cookieOptions);
-        cookieStore.set("directus_refresh_token", refreshToken, cookieOptions);
-        cookieStore.set("user_role", roleName, cookieOptions);
+        cookieStore.set("directus_refresh_token", refreshToken, {
+            path: "/",
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax" as const,
+            // Match this to your Directus REFRESH_TOKEN_TTL (Default is 7 days)
+            maxAge: 60 * 60 * 24 * 7,
+        });
+
+        cookieStore.set("user_role", roleName, {
+            path: "/",
+            httpOnly: true, // Still keep this true for security
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax" as const,
+            // Match this to the REFRESH token life so they expire together
+            maxAge: SEVEN_DAYS,
+        });
 
         return { success: true };
     } catch (err) {

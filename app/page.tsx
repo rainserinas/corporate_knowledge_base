@@ -4,16 +4,19 @@ import Link from "next/link";
 import { Library, Search, ChevronRight } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
 import { SearchInput } from "@/components/SearchInput";
+import { Navbar } from "@/components/Navbar";
+
 import { cn } from "@/lib/utils";
 import { ArticleCard } from "@/components/ArticleCard";
-import { getValidToken } from "./lib/auth-refresh";
 import { Pagination } from "@/components/Pagination";
+import { authenticatedFetch } from './lib/directus-client';
+import { getValidToken } from './lib/auth-refresh';
 
 async function getDashboardData(searchQuery?: string, categorySlug?: string, page: number = 1) {
-	const token = await getValidToken();
-
 	const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL;
 	const limit = 6;
+
+	await getValidToken();
 
 	const params = new URLSearchParams({
 		fields: "id,title,slug,date_created,category.name,category.slug",
@@ -36,22 +39,15 @@ async function getDashboardData(searchQuery?: string, categorySlug?: string, pag
 	try {
 
 		const [userRes, categoriesRes, articlesRes,] = await Promise.all([
-			fetch(`${baseUrl}/users/me?fields=first_name,last_name,avatar,description,title`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-					"Content-Type": "application/json",
-					"Accept": "application/json"
-				},
+			authenticatedFetch(`${baseUrl}/users/me?fields=first_name,last_name,avatar,description,title,role.name`, {
 				cache: "no-store"
 			}),
-			fetch(`${baseUrl}/items/categories?fields=id,name,slug`, {
-				headers: { Authorization: `Bearer ${token}` },
-				next: { revalidate: 30 },
+			authenticatedFetch(`${baseUrl}/items/categories?fields=id,name,slug`, {
+				next: { revalidate: 30 }
 			}),
-			fetch(
+			authenticatedFetch(
 				`${baseUrl}/items/articles?${params.toString()}`,
 				{
-					headers: { Authorization: `Bearer ${token}` },
 					cache: "no-store"
 				}
 			)
@@ -60,12 +56,6 @@ async function getDashboardData(searchQuery?: string, categorySlug?: string, pag
 		const categories = await categoriesRes.json();
 		const articles = await articlesRes.json();
 		const user = await userRes.json();
-
-		if (articles?.errors) {
-			if (articles?.errors[0].message == "Token expired.") {
-				console.log("Token is expired");
-			}
-		}
 
 		const totalCount = articles.meta?.filter_count || 0;
 
@@ -97,28 +87,7 @@ export default async function HomePage({
 	return (
 		<div className="min-h-screen bg-[#F8FAFC]">
 			{/* Nav */}
-			<header className="sticky top-0 z-50 w-full border-b bg-white/70 backdrop-blur-xl">
-				<div className="container mx-auto flex h-16 items-center justify-between px-6">
-					<Link href="/" className="flex items-center gap-2.5">
-						<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 shadow-indigo-200 shadow-lg">
-							<Library className="h-5 w-5 text-white" />
-						</div>
-						<span className="text-lg font-bold tracking-tight text-slate-900">
-							Corporate KB
-						</span>
-					</Link>
-					<nav className="flex items-center gap-6">
-						{/* Added Link */}
-						<Link
-							href="/manage"
-							className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
-						>
-							My Knowledge Base
-						</Link>
-						<LogoutButton />
-					</nav>
-				</div>
-			</header>
+			<Navbar user={user} />
 
 			<main className="container mx-auto max-w-6xl px-6 py-12">
 				{/* Search Hero */}
@@ -144,7 +113,7 @@ export default async function HomePage({
 							<div className="flex flex-col">
 								<span className="text-sm font-bold text-slate-900">{displayName}</span>
 								<span className="text-[10px] font-medium uppercase text-slate-400 tracking-tight">
-									{user?.title || "Senior Staff"}
+									{user?.title || "N/A"}
 								</span>
 							</div>
 						</div>

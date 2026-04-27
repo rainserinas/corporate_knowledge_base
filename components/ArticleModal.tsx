@@ -24,7 +24,7 @@ export function ArticleModal({
         content: initialData?.content || "",
         category: initialData?.category?.name || ""
     });
-    console.log(initialData);
+
     useEffect(() => {
         if (initialData) {
             setFormData({
@@ -42,6 +42,7 @@ export function ArticleModal({
         setLoading(true);
         try {
             if (mode === "edit") {
+                console.log(formData);
                 await updateArticle(initialData.id, formData);
                 toast.success("Article updated successfully");
             } else {

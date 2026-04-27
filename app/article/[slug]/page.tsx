@@ -3,6 +3,9 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { format } from "date-fns";
 import { getValidToken } from "@/app/lib/auth-refresh";
+import { authenticatedFetch } from "@/app/lib/directus-client";
+import { TiptapRenderer } from "@/components/TiptapEditor";
+import { Navbar } from "@/components/Navbar";
 
 export default async function ArticlePage({
     params,
@@ -20,20 +23,15 @@ export default async function ArticlePage({
         `src="${baseUrl}/assets/`
     );
 
+    const userRes = await authenticatedFetch(`${baseUrl}/users/me?fields=id,first_name,last_name,avatar,description,title,role`, {
+        cache: "no-store"
+    });
+    const { data: user } = await userRes.json();
+
     return (
         <main className="min-h-screen bg-slate-50 pb-20">
             {/* Navigation Header */}
-            <nav className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-                <div className="container mx-auto flex h-16 max-w-4xl items-center px-6">
-                    <Link
-                        href="/"
-                        className="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        Back to Knowledge Base
-                    </Link>
-                </div>
-            </nav>
+            <Navbar user={user} />
 
             <article className="container mx-auto max-w-4xl px-6 pt-12">
                 {/* Header Meta */}
@@ -64,10 +62,7 @@ export default async function ArticlePage({
                 </header>
 
                 <div className="bg-white p-8 md:p-12 rounded-3xl border border-slate-200">
-                    <div
-                        className="prose prose-slate prose-indigo max-w-none"
-                        dangerouslySetInnerHTML={{ __html: formattedContent }}
-                    />
+                    <TiptapRenderer content={formattedContent} />
                 </div>
             </article>
         </main>
@@ -80,10 +75,9 @@ async function getArticleData(slug: string) {
 
     const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL;
 
-    const response = await fetch(
+    const response = await authenticatedFetch(
         `${baseUrl}/items/articles?filter[slug][_eq]=${slug}&fields=title,content,date_created,category.name,user_created.first_name,user_created.last_name,slug`,
         {
-            headers: { Authorization: `Bearer ${token}` },
             cache: "no-store",
         }
     );

@@ -7,6 +7,7 @@ export async function logoutAction() {
     const cookieStore = await cookies();
 
     cookieStore.delete("directus_token");
+    cookieStore.delete("directus_refresh_token");
     cookieStore.delete("user_role");
 
     redirect("/login");

@@ -5,6 +5,10 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { Bold, Italic, List, ImageIcon } from 'lucide-react';
 
+interface TiptapRendererProps {
+    content: string;
+}
+
 const MenuBar = ({ editor }: { editor: any }) => {
     if (!editor) return null;
 
@@ -29,20 +33,13 @@ const MenuBar = ({ editor }: { editor: any }) => {
             >
                 <List className="h-4 w-4" />
             </button>
-            <button
-                type="button"
-                onClick={addImage}
-                className="p-1.5 rounded text-slate-500 hover:bg-white"
-            >
-                <ImageIcon className="h-4 w-4" />
-            </button>
         </div>
     );
 };
 
 export const TiptapEditor = ({ content, onChange }: { content: string, onChange: (val: string) => void }) => {
     const editor = useEditor({
-        extensions: [StarterKit, Image],
+        extensions: [StarterKit],
         content: content,
         immediatelyRender: false,
         onUpdate: ({ editor }) => {
@@ -50,7 +47,7 @@ export const TiptapEditor = ({ content, onChange }: { content: string, onChange:
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-sm focus:outline-none min-h-[200px] p-3 max-w-none',
+                class: 'prose prose-slate prose-indigo focus:outline-none min-h-[300px] p-6 max-w-none',
             },
         },
     });
@@ -61,4 +58,32 @@ export const TiptapEditor = ({ content, onChange }: { content: string, onChange:
             <EditorContent editor={editor} />
         </div>
     );
+};
+
+export const TiptapRenderer = ({ content }: TiptapRendererProps) => {
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            Image.configure({
+                HTMLAttributes: {
+                    class: 'rounded-2xl border border-slate-200',
+                },
+            })
+        ],
+        content: content,
+        editable: false, // Disables editing
+        immediatelyRender: false,
+        editorProps: {
+            attributes: {
+                // IMPORTANT: Use the exact same prose classes here as your Article Page
+                class: 'prose prose-slate prose-indigo max-w-none focus:outline-none',
+            },
+        },
+    });
+
+    if (!editor) {
+        return <div className="animate-pulse bg-slate-100 h-64 rounded-3xl" />;
+    }
+
+    return <EditorContent editor={editor} />;
 };

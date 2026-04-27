@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📚 Knowledge Base App
 
-## Getting Started
+A Next.js knowledge base application powered by **Directus CMS**, hosted on a personal VPS. The app supports role-based access — Team Leads can fully manage knowledge base entries, while Members have read-only access.
 
-First, run the development server:
+---
+
+## 🚀 Getting Started (Running Locally)
+
+### Prerequisites
+
+Make sure you have the following installed:
+
+- [Node.js](https://nodejs.org/) (v20 or higher recommended)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+
+### 1. Clone the Repository
+
+```bash
+git clone <your-repo-url>
+cd <your-project-folder>
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+# or
+yarn install
+```
+
+### 3. Set Up Environment Variables
+
+Create a `.env.local` file in the root of your project and add the following:
+
+```env
+NEXT_PUBLIC_DIRECTUS_URL=https://kb-exam.slipstreamph.com
+```
+
+### 4. Run the Development Server
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔐 Login Credentials
 
-## Learn More
+> **Note:** There is no sign-up page. Use the credentials below to log in.
 
-To learn more about Next.js, take a look at the following resources:
+### 👔 Team Leads
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Team Leads have **full access** — they can **create, update, and delete** knowledge base entries.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Email                    | Password         |
+| ------------------------ | ---------------- |
+| johndoe@gmail.com        | tAEFdG1xzo4NlbHp |
+| kurtcastro0528@gmail.com | 020BMpp3ZenR7hte |
 
-## Deploy on Vercel
+### 👤 Member
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Members have **read-only access** — they can browse and view knowledge base entries but cannot make any changes.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Email                 | Password         |
+| --------------------- | ---------------- |
+| apollosmart@gmail.com | xBE4yRMv2HCHqOrh |
+
+---
+
+## 🛠️ Tech Stack & Integrations
+
+### Directus CMS
+
+This project is integrated with **[Directus](https://directus.io/)** as its headless CMS backend. Directus manages all knowledge base content, user authentication, and role-based permissions. The Directus instance is **self-hosted on a personal VPS** and is accessible at:
+
+```
+https://kb-exam.slipstreamph.com
+```
+
+### Frontend
+
+- **Next.js** — React framework for the frontend
+- **Directus SDK** — For communicating with the Directus REST API
+
+---
+
+## 📝 Notes
+
+- Do **not** commit your `.env.local` file to version control.
+- Role permissions (Team Lead vs Member) are managed directly in Directus.
