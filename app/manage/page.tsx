@@ -3,6 +3,7 @@ import { ManageTable } from "@/components/ManageTable";
 import { ArticleModal } from "@/components/ArticleModal";
 import { Navbar } from "@/components/Navbar";
 import { authenticatedFetch } from "../lib/directus-client";
+import { redirect } from "next/navigation";
 
 export default async function ManageKBPage() {
     const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL;
@@ -11,6 +12,10 @@ export default async function ManageKBPage() {
         cache: "no-store"
     });
     const { data: user } = await userRes.json();
+
+    if (user.role.name !== "Team Leads") {
+        redirect('/');
+    }
 
     const [articlesRes, categoriesRes] = await Promise.all([
 
