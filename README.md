@@ -131,3 +131,4 @@ We have implemented unit tests for the following critical areas:
 
 - Do **not** commit your `.env.local` file to version control.
 - Role permissions (Team Lead vs Member) are managed directly in Directus.
+- Some knowledge base entries contain intentionally malformed content to demonstrate the application's ability to safely handle and render rich text editor output.
