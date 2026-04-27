@@ -6,19 +6,20 @@ import { usePathname } from "next/navigation";
 import { Library, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "@/components/LogoutButton";
-
-const navLinks = [
-    { name: "My Knowledge Base", href: "/manage" }
-];
+import { shouldShowManagementNav } from "@/app/lib/utils"; // Import your helper
 
 export function Navbar({ user }: { user: any }) {
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
 
+    // Check permissions using your tested utility
+    const canManage = shouldShowManagementNav(user?.role?.name);
+
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-xl">
             <div className="container mx-auto flex h-16 items-center justify-between px-6">
 
+                {/* Logo Section */}
                 <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-90">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 shadow-lg shadow-indigo-200">
                         <Library className="h-5 w-5 text-white" />
@@ -28,28 +29,24 @@ export function Navbar({ user }: { user: any }) {
                     </span>
                 </Link>
 
+                {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center gap-8">
-                    {navLinks.map((link) => {
-                        if (user.role.name !== "Team Leads") {
-                            return null;
-                        }
-
-                        return (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className={cn(
-                                    "text-sm font-medium transition-colors hover:text-indigo-600",
-                                    pathname === link.href ? "text-indigo-600" : "text-slate-600"
-                                )}
-                            >
-                                {link.name}
-                            </Link>
-                        );
-                    })}
+                    {/* Guard the "My Knowledge Base" link */}
+                    {canManage && (
+                        <Link
+                            href="/manage"
+                            className={cn(
+                                "text-sm font-medium transition-colors hover:text-indigo-600",
+                                pathname === "/manage" ? "text-indigo-600" : "text-slate-600"
+                            )}
+                        >
+                            My Knowledge Base
+                        </Link>
+                    )}
                     <LogoutButton />
                 </nav>
 
+                {/* Mobile Menu Toggle */}
                 <button
                     className="block md:hidden text-slate-600"
                     onClick={() => setIsOpen(!isOpen)}
@@ -58,21 +55,21 @@ export function Navbar({ user }: { user: any }) {
                 </button>
             </div>
 
+            {/* Mobile Navigation */}
             {isOpen && (
                 <div className="absolute top-16 left-0 w-full border-b bg-white p-6 md:hidden flex flex-col gap-4 shadow-xl">
-                    {navLinks.map((link) => (
+                    {canManage && (
                         <Link
-                            key={link.href}
-                            href={link.href}
+                            href="/manage"
                             onClick={() => setIsOpen(false)}
                             className={cn(
                                 "text-base font-medium",
-                                pathname === link.href ? "text-indigo-600" : "text-slate-600"
+                                pathname === "/manage" ? "text-indigo-600" : "text-slate-600"
                             )}
                         >
-                            {link.name}
+                            My Knowledge Base
                         </Link>
-                    ))}
+                    )}
                     <hr className="border-slate-100" />
                     <LogoutButton />
                 </div>

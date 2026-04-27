@@ -5,6 +5,8 @@ import { Plus, X, Loader2, Image as ImageIcon, FileEdit } from "lucide-react";
 import { createArticle, updateArticle } from "@/app/actions/generalAction";
 import { toast } from "sonner";
 import { TiptapEditor } from "./TiptapEditor";
+import { generateSlug } from "@/app/lib/utils";
+import { sanitizeArticlePayload } from "@/app/lib/api-helpers";
 
 export function ArticleModal({
     initialData,
@@ -41,13 +43,7 @@ export function ArticleModal({
         e.preventDefault();
         setLoading(true);
 
-        const cleanData = {
-            title: formData.title,
-            slug: formData.slug,
-            status: formData.status,
-            content: formData.content,
-            category: formData.category
-        };
+        const cleanData = sanitizeArticlePayload(formData);
 
         try {
             if (mode === "edit") {
@@ -68,17 +64,10 @@ export function ArticleModal({
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newTitle = e.target.value;
 
-        const generatedSlug = newTitle
-            .toLowerCase()
-            .trim()
-            .replace(/[^\w\s-]/g, "")
-            .replace(/[\s_-]+/g, "-")
-            .replace(/^-+|-+$/g, "");
-
         setFormData((prev) => ({
             ...prev,
             title: newTitle,
-            slug: generatedSlug
+            slug: generateSlug(newTitle)
         }));
     };
 

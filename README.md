@@ -10,7 +10,7 @@ A Next.js knowledge base application powered by **Directus CMS**, hosted on a pe
 
 Make sure you have the following installed:
 
-- [Node.js](https://nodejs.org/) (v20 or higher recommended)
+- [Node.js](https://nodejs.org/) (v18 or higher recommended) (im using v20 on my local machine)
 - [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
 
 ### 1. Clone the Repository
@@ -85,6 +85,45 @@ https://kb-exam.slipstreamph.com
 
 - **Next.js** — React framework for the frontend
 - **Directus SDK** — For communicating with the Directus REST API
+
+---
+
+## 🧪 Testing Suite
+
+This project uses **Vitest** for unit testing. The testing strategy focuses on **Core Business Logic** — the parts of the application where errors would result in broken URLs, security breaches, or API failures.
+
+### How to Run Tests
+
+1. Ensure dependencies are installed:
+
+```bash
+npm install
+```
+
+2. Execute the test suite:
+
+```bash
+npm test
+```
+
+### Tested Components & Logic
+
+We have implemented unit tests for the following critical areas:
+
+#### 🔗 URL Slug Generation (`app/lib/utils.ts`)
+
+- Verifies that article titles are correctly converted to SEO-friendly slugs.
+- Handles edge cases like special characters (e.g., `"Next.js"` becoming `"next-js"`), multiple spaces, and trailing dashes.
+
+#### 🧹 Data Sanitization (`app/lib/api-helpers.ts`)
+
+- Ensures that only serializable, Directus-compatible fields are sent to the API.
+- Prevents "junk" data (like React internal state or non-serializable objects) from causing `400 Bad Request` errors.
+
+#### 🛡️ Role-Based Access Control / RBAC (`app/lib/utils.ts`)
+
+- **Management Logic:** Verifies that only `Team Leads` and `Administrators` can Create, Edit, or Delete articles.
+- **Navigation Visibility:** Ensures that the `"My Knowledge Base"` link is hidden from `Member` roles to maintain a clean and secure UI.
 
 ---
 
