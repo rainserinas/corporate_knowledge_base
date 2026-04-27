@@ -192,7 +192,7 @@ export default async function HomePage({
 
 									<Pagination
 										currentPage={currentPage}
-										totalPages={totalPages}
+										totalPages={totalPages ?? 1}
 									/>
 								</div>
 							)}
