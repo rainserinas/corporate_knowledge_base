@@ -1,9 +1,7 @@
-import { ArrowLeft, Calendar, Tag, User, MessageSquarePlus, Lightbulb, ArrowRight } from "lucide-react";
+import { ArrowLeft, Calendar, Tag, User } from "lucide-react";
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { format } from "date-fns";
-import FeedbackForm from "@/components/FeedbackForm";
 import { getValidToken } from "@/app/lib/auth-refresh";
 
 export default async function ArticlePage({
@@ -14,8 +12,6 @@ export default async function ArticlePage({
     const slug = (await params).slug;
     const article = await getArticleData(slug);
     const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL;
-    const cookieStore = await cookies();
-    const userRole = cookieStore.get("user_role")?.value;
 
     if (!article) notFound();
 
@@ -72,24 +68,6 @@ export default async function ArticlePage({
                         className="prose prose-slate prose-indigo max-w-none"
                         dangerouslySetInnerHTML={{ __html: formattedContent }}
                     />
-
-                    {/* MEMBER FEEDBACK SECTION */}
-                    {userRole === "Member" && (
-                        <div className="mt-16 p-8 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex flex-col md:flex-row items-center gap-6">
-                            <div className="bg-white p-3 rounded-xl shadow-sm">
-                                <Lightbulb className="h-6 w-6 text-indigo-600" />
-                            </div>
-
-                            <div className="flex-1 text-center md:text-left">
-                                <h3 className="text-lg font-bold text-slate-900">Have a suggestion?</h3>
-                                <p className="text-sm text-slate-600">
-                                    As a team member, you can suggest edits or provide feedback to improve this documentation.
-                                </p>
-                            </div>
-
-                            <FeedbackForm slug={article.slug} />
-                        </div>
-                    )}
                 </div>
             </article>
         </main>

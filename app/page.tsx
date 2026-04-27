@@ -2,21 +2,27 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Library, Search, ChevronRight } from "lucide-react";
-import { LogoutButton } from "@/components/logout-button";
-import { SearchInput } from "@/components/search-input";
+import { LogoutButton } from "@/components/LogoutButton";
+import { SearchInput } from "@/components/SearchInput";
 import { cn } from "@/lib/utils";
-import { ArticleCard } from "@/components/article-card";
+import { ArticleCard } from "@/components/ArticleCard";
 import { getValidToken } from "./lib/auth-refresh";
+import { Pagination } from "@/components/Pagination";
 
-async function getDashboardData(searchQuery?: string, categorySlug?: string) {
+async function getDashboardData(searchQuery?: string, categorySlug?: string, page: number = 1) {
 	const token = await getValidToken();
 
 	const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL;
+	const limit = 6;
 
 	const params = new URLSearchParams({
 		fields: "id,title,slug,date_created,category.name,category.slug",
 		"filter[status][_eq]": "Published",
-		sort: "-date_created"
+		sort: "-date_created",
+		// Pagination Params
+		limit: limit.toString(),
+		page: page.toString(),
+		meta: "filter_count", // This is crucial for calculating total pages
 	});
 
 	if (searchQuery) {
@@ -61,10 +67,14 @@ async function getDashboardData(searchQuery?: string, categorySlug?: string) {
 			}
 		}
 
+		const totalCount = articles.meta?.filter_count || 0;
+
 		return {
 			categories: categories.data || [],
 			articles: articles.data || [],
-			user: user.data || null
+			user: user.data || null,
+			totalCount: totalCount,
+			totalPages: totalCount > 0 ? Math.ceil(totalCount / limit) : 1
 		};
 	} catch (error) {
 		console.error("Dashboard Fetch Error:", error);
@@ -75,12 +85,13 @@ async function getDashboardData(searchQuery?: string, categorySlug?: string) {
 export default async function HomePage({
 	searchParams,
 }: {
-	searchParams: Promise<{ q?: string; category?: string; }>;
+	searchParams: Promise<{ q?: string; category?: string; page?: string }>;
 }) {
 	const query = (await searchParams).q;
 	const activeCategory = (await searchParams).category;
-
-	const { categories, articles, user } = await getDashboardData(query, activeCategory);
+	const { page } = await searchParams;
+	const currentPage = Number(page) || 1;
+	const { categories, articles, user, totalPages } = await getDashboardData(query, activeCategory, currentPage);
 	const displayName = user?.first_name ? `${user.first_name} ${user.last_name || ""}` : "Team Member";
 
 	return (
@@ -88,15 +99,22 @@ export default async function HomePage({
 			{/* Nav */}
 			<header className="sticky top-0 z-50 w-full border-b bg-white/70 backdrop-blur-xl">
 				<div className="container mx-auto flex h-16 items-center justify-between px-6">
-					<div className="flex items-center gap-2.5">
+					<Link href="/" className="flex items-center gap-2.5">
 						<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 shadow-indigo-200 shadow-lg">
 							<Library className="h-5 w-5 text-white" />
 						</div>
 						<span className="text-lg font-bold tracking-tight text-slate-900">
 							Corporate KB
 						</span>
-					</div>
+					</Link>
 					<nav className="flex items-center gap-6">
+						{/* Added Link */}
+						<Link
+							href="/manage"
+							className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
+						>
+							My Knowledge Base
+						</Link>
 						<LogoutButton />
 					</nav>
 				</div>
@@ -208,6 +226,11 @@ export default async function HomePage({
 									{articles.map((article: any) => (
 										<ArticleCard key={article.id} article={article} />
 									))}
+
+									<Pagination
+										currentPage={currentPage}
+										totalPages={totalPages}
+									/>
 								</div>
 							)}
 						</div>

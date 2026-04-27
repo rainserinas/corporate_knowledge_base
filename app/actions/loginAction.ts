@@ -76,12 +76,3 @@ export async function loginAction({ email, password }: LoginCredentials) {
         return { success: false, error: "System error. Please try again later." };
     }
 }
-
-export async function logoutAction() {
-    const cookieStore = await cookies();
-
-    cookieStore.delete("directus_token");
-    cookieStore.delete("user_role");
-
-    redirect("/login");
-}

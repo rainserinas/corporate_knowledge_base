@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Mail, Loader2, ShieldCheck, Library, Eye, EyeOff, } from "lucide-react";
-import { loginAction } from "./actions";
+import { loginAction } from "../actions/loginAction";
+import { getValidToken } from "../lib/auth-refresh";
+
 
 export default function LoginPage() {
     const [isPending, startTransition] = useTransition();
@@ -17,6 +19,18 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
 
     const router = useRouter();
+
+    useEffect(() => {
+        const verifySession = async () => {
+            const token = await getValidToken();
+
+            if (token) {
+                router.push("/");
+            }
+        };
+
+        verifySession();
+    }, [router]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

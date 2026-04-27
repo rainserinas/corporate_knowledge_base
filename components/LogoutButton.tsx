@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { logoutAction } from "@/app/login/actions";
+import { logoutAction } from "@/app/actions/logoutAction";
 import { toast } from "sonner";
 
 export function LogoutButton() {
