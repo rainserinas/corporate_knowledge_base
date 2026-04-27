@@ -30,18 +30,32 @@ export async function createArticle(data: any) {
     const token = await getValidToken();
     if (!token) throw new Error("Unauthorized");
 
-    const response = await authenticatedFetch(
-        `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/items/articles`,
-        {
+    try {
+        const payload = {
+            ...data,
+        };
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/items/articles`, {
             method: "POST",
-            body: JSON.stringify(data),
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            const errorMessage = errorData.errors?.[0]?.message || "Failed to create article";
+            throw new Error(errorMessage);
         }
-    );
 
-    if (!response.ok) throw new Error("Failed to create article");
-
-    revalidatePath("/manage");
-    return { success: true };
+        revalidatePath("/manage");
+        return { success: true };
+    } catch (error: any) {
+        console.error("Create Action Failed:", error.message);
+        throw error;
+    }
 }
 
 export async function updateArticle(id: string | number, data: any) {
@@ -49,25 +63,8 @@ export async function updateArticle(id: string | number, data: any) {
     if (!token) throw new Error("Unauthorized");
 
     try {
-        // 1. Fetch categories to find the ID that matches the Name
-        const catRes = await authenticatedFetch(
-            `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/items/categories`,
-            {}
-        );
-        const { data: categories } = await catRes.json();
-
-        // 2. Map the name to the ID
-        // We look for a category where the name matches data.category
-        const matchedCat = categories.find((c: any) => c.name === data.category);
-
-        if (!matchedCat) {
-            throw new Error(`Category "${data.category}" not found.`);
-        }
-
-        // 3. Swap the name for the ID in the payload
         const payload = {
             ...data,
-            category: matchedCat.id, // Replace "Tooling" with the ID (e.g. 5)
         };
 
         const response = await authenticatedFetch(

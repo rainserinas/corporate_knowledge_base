@@ -9,7 +9,7 @@ import { authenticatedFetch } from "../lib/directus-client";
 
 export default async function ManageKBPage() {
     const baseUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL;
-
+    await getValidToken();
     const userRes = await authenticatedFetch(`${baseUrl}/users/me?fields=id,first_name,last_name,avatar,description,title,role.name`, {
         cache: "no-store"
     });

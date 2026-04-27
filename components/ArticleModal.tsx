@@ -32,7 +32,7 @@ export function ArticleModal({
                 slug: initialData.slug,
                 status: initialData.status,
                 content: initialData.content,
-                category: initialData.category?.name || initialData.category
+                category: initialData.category?.id || initialData.category
             });
         }
     }, [initialData]);
@@ -40,18 +40,27 @@ export function ArticleModal({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+
+        const cleanData = {
+            title: formData.title,
+            slug: formData.slug,
+            status: formData.status,
+            content: formData.content,
+            category: formData.category // This is now the UUID string
+        };
+
         try {
             if (mode === "edit") {
-                console.log(formData);
-                await updateArticle(initialData.id, formData);
-                toast.success("Article updated successfully");
+                await updateArticle(initialData.id, cleanData);
+                toast.success("Article updated");
             } else {
-                await createArticle(formData);
-                toast.success("Article created successfully");
+                await createArticle(cleanData);
+                toast.success("Article created");
             }
             setIsOpen(false);
-        } catch (error) {
-            toast.error("An error occurred");
+        } catch (error: any) {
+            // Log the specific error message from the Server Action
+            toast.error(error.message || "Failed to save article");
         } finally {
             setLoading(false);
         }
@@ -140,12 +149,14 @@ export function ArticleModal({
                                         <select
                                             required
                                             className="w-full p-2.5 border border-slate-200 rounded-xl bg-white text-sm focus:ring-2 ring-indigo-50 outline-none"
-                                            value={formData.category}
+                                            value={formData.category} // This should be an ID state
                                             onChange={e => setFormData({ ...formData, category: e.target.value })}
                                         >
                                             <option value="">Select Category</option>
                                             {categories.map(cat => (
-                                                <option key={cat.id} value={cat.name}>{cat.name}</option>
+                                                <option key={cat.id} value={cat.id}> {/* Ensure value is cat.id, NOT cat.name */}
+                                                    {cat.name}
+                                                </option>
                                             ))}
                                         </select>
                                     </div>
