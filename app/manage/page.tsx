@@ -1,7 +1,4 @@
 import { getValidToken } from "@/app/lib/auth-refresh";
-import Link from "next/link";
-import { Library } from "lucide-react";
-import { LogoutButton } from "@/components/LogoutButton";
 import { ManageTable } from "@/components/ManageTable";
 import { ArticleModal } from "@/components/ArticleModal";
 import { Navbar } from "@/components/Navbar";

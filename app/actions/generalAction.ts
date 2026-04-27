@@ -71,7 +71,7 @@ export async function updateArticle(id: string | number, data: any) {
             `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/items/articles/${id}`,
             {
                 method: "PATCH",
-                body: JSON.stringify(payload), // Send the updated payload
+                body: JSON.stringify(payload),
             }
         );
 

@@ -1,6 +1,5 @@
 "use client";
 
-// components/Pagination.tsx
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -19,7 +18,6 @@ export function Pagination({ currentPage, totalPages }: { currentPage: number; t
 
     return (
         <div className="mt-12 flex items-center justify-center gap-2">
-            {/* Previous Button */}
             <Link
                 href={getPageLink(currentPage - 1)}
                 className={`p-2 rounded-lg border transition-all ${currentPage <= 1
@@ -30,9 +28,7 @@ export function Pagination({ currentPage, totalPages }: { currentPage: number; t
                 <ChevronLeft className="h-5 w-5" />
             </Link>
 
-            {/* Page Numbers */}
             <div className="flex items-center gap-1">
-                {/* Ensure we only create buttons for existing pages */}
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                     <Link
                         key={pageNum}
@@ -47,7 +43,6 @@ export function Pagination({ currentPage, totalPages }: { currentPage: number; t
                 ))}
             </div>
 
-            {/* Next Button */}
             <Link
                 href={getPageLink(currentPage + 1)}
                 className={`p-2 rounded-lg border transition-all ${currentPage >= totalPages

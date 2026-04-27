@@ -30,11 +30,9 @@ export default async function ArticlePage({
 
     return (
         <main className="min-h-screen bg-slate-50 pb-20">
-            {/* Navigation Header */}
             <Navbar user={user} />
 
             <article className="container mx-auto max-w-4xl px-6 pt-12">
-                {/* Header Meta */}
                 <header className="mb-10 space-y-6">
                     {article.category && (
                         <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-indigo-600">

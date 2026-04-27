@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Library, Menu, X } from "lucide-react";
-import { cn } from "@/lib/utils"; // Standard shadcn helper or use template literals
+import { cn } from "@/lib/utils";
 import { LogoutButton } from "@/components/LogoutButton";
 
 const navLinks = [
@@ -19,7 +19,6 @@ export function Navbar({ user }: { user: any }) {
         <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-xl">
             <div className="container mx-auto flex h-16 items-center justify-between px-6">
 
-                {/* Logo Section */}
                 <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-90">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 shadow-lg shadow-indigo-200">
                         <Library className="h-5 w-5 text-white" />
@@ -29,10 +28,8 @@ export function Navbar({ user }: { user: any }) {
                     </span>
                 </Link>
 
-                {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center gap-8">
                     {navLinks.map((link) => {
-                        // Check if the link requires "Team Leads" and if the user matches
                         if (user.role.name !== "Team Leads") {
                             return null;
                         }
@@ -53,7 +50,6 @@ export function Navbar({ user }: { user: any }) {
                     <LogoutButton />
                 </nav>
 
-                {/* Mobile Menu Button */}
                 <button
                     className="block md:hidden text-slate-600"
                     onClick={() => setIsOpen(!isOpen)}
@@ -62,7 +58,6 @@ export function Navbar({ user }: { user: any }) {
                 </button>
             </div>
 
-            {/* Mobile Dropdown */}
             {isOpen && (
                 <div className="absolute top-16 left-0 w-full border-b bg-white p-6 md:hidden flex flex-col gap-4 shadow-xl">
                     {navLinks.map((link) => (

@@ -1,7 +1,5 @@
 import { cookies } from "next/headers";
 
-// This variable lives in the server memory.
-// It holds the "active" refresh process so others can wait for it.
 let refreshPromise: Promise<boolean> | null = null;
 
 async function performRefresh() {
@@ -21,7 +19,6 @@ async function performRefresh() {
 
         const { data } = await response.json();
 
-        // Update the cookies with the fresh tokens
         cookieStore.set("directus_token", data.access_token, {
             httpOnly: true,
             secure: true,
@@ -44,7 +41,6 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
     const cookieStore = await cookies();
 
     const execute = async () => {
-        // Get the latest token from the cookie store
         const token = cookieStore.get("directus_token")?.value;
         return fetch(url, {
             ...options,
@@ -58,25 +54,18 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
 
     let response = await execute();
 
-    // If the token is expired (401)
     if (response.status == 401) {
-        // If a refresh is ALREADY happening, wait for it.
-        // If not, start the refresh process.
         if (!refreshPromise) {
             refreshPromise = performRefresh();
         }
 
         const success = await refreshPromise;
 
-        // Clear the promise after it finishes so the next expiry cycle can run
         refreshPromise = null;
 
         if (success) {
-            // Retry the original request with the brand new token
             response = await execute();
         } else {
-            // Refresh failed (e.g. refresh token expired), redirect to login
-            // You can handle this by throwing or returning a specific state
             console.warn("Session expired. User needs to re-login.");
         }
     }

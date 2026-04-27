@@ -22,10 +22,9 @@ async function getDashboardData(searchQuery?: string, categorySlug?: string, pag
 		fields: "id,title,slug,date_created,category.name,category.slug",
 		"filter[status][_eq]": "Published",
 		sort: "-date_created",
-		// Pagination Params
 		limit: limit.toString(),
 		page: page.toString(),
-		meta: "filter_count", // This is crucial for calculating total pages
+		meta: "filter_count",
 	});
 
 	if (searchQuery) {
@@ -86,11 +85,9 @@ export default async function HomePage({
 
 	return (
 		<div className="min-h-screen bg-[#F8FAFC]">
-			{/* Nav */}
 			<Navbar user={user} />
 
 			<main className="container mx-auto max-w-6xl px-6 py-12">
-				{/* Search Hero */}
 				<section className="mb-16 space-y-8">
 					<div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
 						<div className="space-y-4">
@@ -105,7 +102,6 @@ export default async function HomePage({
 							</div>
 						</div>
 
-						{/* Visual User ID Card (The "Better UI" suggestion) */}
 						<div className="hidden lg:flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
 							<div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-indigo-600 font-bold border border-slate-200">
 								{user?.first_name?.[0] || "U"}
@@ -125,7 +121,6 @@ export default async function HomePage({
 				</section>
 
 				<div className="grid gap-12 lg:grid-cols-[260px_1fr]">
-					{/* Categories Sidebar */}
 					<aside className="hidden lg:block space-y-8">
 						<div>
 							<h3 className="mb-4 text-[11px] font-bold uppercase tracking-widest text-slate-400">
@@ -167,7 +162,6 @@ export default async function HomePage({
 						</div>
 					</aside>
 
-					{/* Articles List */}
 					<section className="space-y-6">
 						<div className="flex items-center justify-between border-b border-slate-200 pb-4">
 							<h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">

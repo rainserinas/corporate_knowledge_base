@@ -43,7 +43,7 @@ export const TiptapEditor = ({ content, onChange }: { content: string, onChange:
         content: content,
         immediatelyRender: false,
         onUpdate: ({ editor }) => {
-            onChange(editor.getHTML()); // Send HTML back to your form state
+            onChange(editor.getHTML());
         },
         editorProps: {
             attributes: {
@@ -71,11 +71,10 @@ export const TiptapRenderer = ({ content }: TiptapRendererProps) => {
             })
         ],
         content: content,
-        editable: false, // Disables editing
+        editable: false,
         immediatelyRender: false,
         editorProps: {
             attributes: {
-                // IMPORTANT: Use the exact same prose classes here as your Article Page
                 class: 'prose prose-slate prose-indigo max-w-none focus:outline-none',
             },
         },

@@ -20,7 +20,6 @@ export function ArticleCard({ article }: { article: Article }) {
         >
             <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3">
-                    {/* Category Badge */}
                     {article.category && (
                         <div className="flex items-center gap-1.5">
                             <Tag className="h-3 w-3 text-indigo-500" />

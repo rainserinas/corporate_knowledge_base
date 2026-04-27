@@ -1,4 +1,3 @@
-// lib/auth-refresh.ts or similar
 "use server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";

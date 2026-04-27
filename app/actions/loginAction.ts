@@ -64,9 +64,7 @@ export async function loginAction({ email, password }: LoginCredentials) {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax" as const,
-            // Directus returns 'expires' in milliseconds (usually 900,000)
-            // maxAge expects seconds
-            maxAge: 15 * 60, // 15 minutes
+            maxAge: 15 * 60,
         });
 
         cookieStore.set("directus_refresh_token", refreshToken, {
@@ -74,16 +72,14 @@ export async function loginAction({ email, password }: LoginCredentials) {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax" as const,
-            // Match this to your Directus REFRESH_TOKEN_TTL (Default is 7 days)
             maxAge: 60 * 60 * 24 * 7,
         });
 
         cookieStore.set("user_role", roleName, {
             path: "/",
-            httpOnly: true, // Still keep this true for security
+            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax" as const,
-            // Match this to the REFRESH token life so they expire together
             maxAge: SEVEN_DAYS,
         });
 

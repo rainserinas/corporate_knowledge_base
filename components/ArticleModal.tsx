@@ -46,7 +46,7 @@ export function ArticleModal({
             slug: formData.slug,
             status: formData.status,
             content: formData.content,
-            category: formData.category // This is now the UUID string
+            category: formData.category
         };
 
         try {
@@ -59,7 +59,6 @@ export function ArticleModal({
             }
             setIsOpen(false);
         } catch (error: any) {
-            // Log the specific error message from the Server Action
             toast.error(error.message || "Failed to save article");
         } finally {
             setLoading(false);
@@ -69,7 +68,6 @@ export function ArticleModal({
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newTitle = e.target.value;
 
-        // Generate the slug directly from the new title
         const generatedSlug = newTitle
             .toLowerCase()
             .trim()
@@ -77,7 +75,6 @@ export function ArticleModal({
             .replace(/[\s_-]+/g, "-")
             .replace(/^-+|-+$/g, "");
 
-        // Update both in ONE state call (avoids cascading renders)
         setFormData((prev) => ({
             ...prev,
             title: newTitle,
@@ -99,10 +96,8 @@ export function ArticleModal({
             {isOpen && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
 
-                    {/* Modal Card - Set to max 90% of screen height */}
                     <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
 
-                        {/* Header - Fixed */}
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
                             <div>
 
@@ -126,10 +121,8 @@ export function ArticleModal({
                             </button>
                         </div>
 
-                        {/* Form Body - The Scrollable Area */}
                         <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
 
-                            {/* Inner Content - Scrollable */}
                             <div className="p-6 space-y-5 overflow-y-auto min-h-0 flex-1 custom-scrollbar">
                                 <div className="grid grid-cols-2 gap-4 text-left">
                                     <div className="space-y-1.5">
@@ -189,11 +182,9 @@ export function ArticleModal({
                                     />
                                 </div>
 
-                                {/* Bottom spacer to prevent the last field from touching the footer */}
                                 <div className="h-2" />
                             </div>
 
-                            {/* Footer - Fixed Button Area */}
                             <div className="p-6 border-t border-slate-100 bg-slate-50/50 shrink-0">
                                 <div className="flex gap-3">
                                     <button
